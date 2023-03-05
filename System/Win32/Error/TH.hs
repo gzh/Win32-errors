@@ -7,7 +7,8 @@ module System.Win32.Error.TH
   , genfromDWORD
   ) where
 
-import Language.Haskell.TH
+import Language.Haskell.TH hiding(conP)
+import TemplateHaskell.Compat.V0208
 import System.Win32 (DWORD)
 
 import System.Win32.Error.Mapping
@@ -49,12 +50,12 @@ gentoDWORD :: Q [Dec]
 gentoDWORD  = do
     x <- newName "x"
     return [ SigD toDWORD (AppT (AppT ArrowT (ConT errCode)) (ConT ''DWORD))
-           , FunD toDWORD $ Clause [ConP errOther [VarP x]] (NormalB (VarE x)) [] : map genClause mapping
+           , FunD toDWORD $ Clause [conP errOther [VarP x]] (NormalB (VarE x)) [] : map genClause mapping
            ]
   where
     toDWORD = mkName "toDWORD"
     genClause :: (DWORD, Name) -> Clause
-    genClause (dw, err) = Clause [ConP err []] (NormalB (LitE . litDWORD $ dw)) []
+    genClause (dw, err) = Clause [conP err []] (NormalB (LitE . litDWORD $ dw)) []
 
 -- fromDWORD :: DWORD -> ErrCode
 -- fromDWORD 0 = ErrorSuccess
